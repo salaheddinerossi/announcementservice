@@ -72,4 +72,20 @@ public class AnnouncementController {
                 announcementService.getAnnouncementsByDisaster(id)
         );
     }
+
+    @GetMapping("/disaster/all/{id}")
+    public ResponseEntity<?> getDisasterWithAnnouncements(@PathVariable Long id,@RequestHeader("Authorization") String token){
+        Boolean isOrganization = userService.isOrganization(token,authService);
+
+        if(isOrganization){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    announcementService.getDisasterWithAnnouncement(id)
+            );
+
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you are not allowed to access this page");
+    }
+
+
 }

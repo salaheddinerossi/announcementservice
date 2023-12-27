@@ -29,6 +29,10 @@ public class Zone {
     @JsonIgnoreProperties("zone")
     private List<AssistanceRequest> assistanceRequests = new ArrayList<>();
 
+    @OneToMany(mappedBy = "zone",cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("zone")
+    private List<Announcement> announcements;
+
 
 
 }

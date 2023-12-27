@@ -6,7 +6,7 @@ import org.locationtech.jts.geom.Point;
 
 
 @Data
-@Entity(name = "rssistance_request")
+@Entity(name = "assistance_request")
 public class AssistanceRequest {
 
     @Id

@@ -9,10 +9,7 @@ import com.example.announcementservice.exception.DisasterNotFoundException;
 import com.example.announcementservice.model.*;
 import com.example.announcementservice.repository.AnnouncementRepository;
 import com.example.announcementservice.response.*;
-import com.example.announcementservice.service.AnnouncementService;
-import com.example.announcementservice.service.AuthorizationService;
-import com.example.announcementservice.service.GeometryService;
-import com.example.announcementservice.service.ZoneService;
+import com.example.announcementservice.service.*;
 import jakarta.transaction.Transactional;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
@@ -22,6 +19,9 @@ import java.util.List;
 
 @Service
 public class AnnouncementServiceImpl implements AnnouncementService {
+
+    final
+    DisasterService disasterService;
 
     final
     GeometryService geometryService;
@@ -34,11 +34,12 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     final ZoneService zoneService;
 
-    public AnnouncementServiceImpl(GeometryService geometryService, AnnouncementRepository announcementRepository, AuthorizationService authorizationService, ZoneService zoneService) {
+    public AnnouncementServiceImpl(GeometryService geometryService, AnnouncementRepository announcementRepository, AuthorizationService authorizationService, ZoneService zoneService, DisasterService disasterService) {
         this.geometryService = geometryService;
         this.announcementRepository = announcementRepository;
         this.authorizationService = authorizationService;
         this.zoneService = zoneService;
+        this.disasterService = disasterService;
     }
 
 
@@ -184,6 +185,22 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     }
 
+    @Override
+    public DisasterResponse getDisasterWithAnnouncement(Long id) {
+
+        Disaster disaster = disasterService.getDisasterById(id);
+
+        DisasterResponse disasterResponse= new DisasterResponse();
+
+        disasterResponse.setName(disaster.getName());
+        disasterResponse.setMainZone(disaster.getMainZone());
+
+        List<ZoneResponse> zoneResponses = getZoneResponses(disaster);
+        disasterResponse.setZoneResponses(zoneResponses);
+
+        return disasterResponse;
+    }
+
     private static List<TargetResponse> getTargetResponses(Announcement announcement) {
         List<TargetResponse> targetResponses = new ArrayList<>();
 
@@ -199,5 +216,55 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             targetResponses.add(targetResponse);
         }
         return targetResponses;
+    }
+
+    private static List<ZoneResponse> getZoneResponses(Disaster disaster){
+        List<ZoneResponse> zoneResponses = new ArrayList<>();
+
+        for (Zone zone : disaster.getZones()){
+
+            ZoneResponse zoneResponse = new ZoneResponse();
+
+            zoneResponse.setGeometry(zone.getGeometry());
+            zoneResponse.setName(zone.getName());
+            zoneResponse.setId(zone.getId());
+            zoneResponse.setAssistantRequestResponses(getAssistantRequestResponses(zone));
+            zoneResponse.setAnnouncementOrganizationResponses(getAnnouncementOrganizationResponses(zone));
+
+            zoneResponses.add(zoneResponse);
+        }
+        return zoneResponses;
+    }
+
+    private static List<AssistantRequestResponse> getAssistantRequestResponses(Zone zone){
+        List<AssistantRequestResponse> assistantRequestResponses = new ArrayList<>();
+
+        for(AssistanceRequest assistanceRequest : zone.getAssistanceRequests()){
+            AssistantRequestResponse assistantRequestResponse = new AssistantRequestResponse();
+
+            assistantRequestResponse.setId(assistanceRequest.getId());
+            assistantRequestResponse.setLocalisation(assistanceRequest.getLocalisation());
+            assistantRequestResponse.setExpressNeeds(assistanceRequest.getExpressNeeds());
+
+            assistantRequestResponses.add(assistantRequestResponse);
+        }
+        return assistantRequestResponses;
+    }
+
+    private static List<AnnouncementOrganizationResponse> getAnnouncementOrganizationResponses(Zone zone){
+        List<AnnouncementOrganizationResponse> announcementOrganizationResponses = new ArrayList<>();
+
+        for (Announcement announcement : zone.getAnnouncements()){
+            AnnouncementOrganizationResponse announcementOrganizationResponse = new AnnouncementOrganizationResponse();
+
+            announcementOrganizationResponse.setOrganizationId(announcement.getOrganization().getId());
+            announcementOrganizationResponse.setStatus(String.valueOf(announcement.getStatus()));
+            announcementOrganizationResponse.setTitle(announcement.getTitle());
+            announcementOrganizationResponse.setId(announcement.getId());
+            announcementOrganizationResponse.setArrivePoint(announcement.getArrivePoint());
+
+            announcementOrganizationResponses.add(announcementOrganizationResponse);
+        }
+        return announcementOrganizationResponses;
     }
 }
