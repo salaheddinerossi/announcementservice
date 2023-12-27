@@ -6,6 +6,7 @@ import com.example.announcementservice.enums.Status;
 import com.example.announcementservice.exception.AnnouncementNotFoundException;
 import com.example.announcementservice.exception.DestinationPointException;
 import com.example.announcementservice.exception.DisasterNotFoundException;
+import com.example.announcementservice.exception.StatusNotFoundException;
 import com.example.announcementservice.model.*;
 import com.example.announcementservice.repository.AnnouncementRepository;
 import com.example.announcementservice.response.*;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class AnnouncementServiceImpl implements AnnouncementService {
@@ -98,9 +100,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     @Override
     public AnnouncementResponse getAnnouncement(Long id) {
 
-        Announcement announcement = announcementRepository.findById(id).orElseThrow(
-                AnnouncementNotFoundException::new
-        );
+        Announcement announcement = getAnnouncementById(id);
 
         AnnouncementResponse announcementResponse = new AnnouncementResponse();
 
@@ -154,31 +154,33 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         
         List<AnnouncementResponseDisaster> announcementResponseDisasters = new ArrayList<>();
         for (Announcement announcement : announcements){
-            
-            AnnouncementResponseDisaster announcementResponseDisaster = new AnnouncementResponseDisaster();
+            if(announcement.getStatus()==Status.ACTIVE) {
 
-            List<TargetResponse> targetResponses = getTargetResponses(announcement);
+                AnnouncementResponseDisaster announcementResponseDisaster = new AnnouncementResponseDisaster();
 
-            announcementResponseDisaster.setTargetResponses(targetResponses);
-            announcementResponseDisaster.setTitle(announcement.getTitle());
-            announcementResponseDisaster.setImage(announcement.getImage());
-            announcementResponseDisaster.setId(announcement.getId());
-            announcementResponseDisaster.setDescription(announcement.getDescription());
+                List<TargetResponse> targetResponses = getTargetResponses(announcement);
 
-            Authorization authorization = announcement.getAuthorization();
+                announcementResponseDisaster.setTargetResponses(targetResponses);
+                announcementResponseDisaster.setTitle(announcement.getTitle());
+                announcementResponseDisaster.setImage(announcement.getImage());
+                announcementResponseDisaster.setId(announcement.getId());
+                announcementResponseDisaster.setDescription(announcement.getDescription());
 
-            AuthorizationResponse authorizationResponse = new AuthorizationResponse();
+                Authorization authorization = announcement.getAuthorization();
 
-            authorizationResponse.setId(authorization.getId());
-            authorizationResponse.setName(authorization.getName());
+                AuthorizationResponse authorizationResponse = new AuthorizationResponse();
 
-            announcementResponseDisaster.setAuthorizationResponse(authorizationResponse);
+                authorizationResponse.setId(authorization.getId());
+                authorizationResponse.setName(authorization.getName());
 
-            announcementResponseDisaster.setDisasterName(
-                    announcement.getZone().getDisaster().getName()
-            );
+                announcementResponseDisaster.setAuthorizationResponse(authorizationResponse);
 
-            announcementResponseDisasters.add(announcementResponseDisaster);
+                announcementResponseDisaster.setDisasterName(
+                        announcement.getZone().getDisaster().getName()
+                );
+
+                announcementResponseDisasters.add(announcementResponseDisaster);
+            }
         }
 
         return announcementResponseDisasters;
@@ -199,6 +201,35 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         disasterResponse.setZoneResponses(zoneResponses);
 
         return disasterResponse;
+    }
+
+    @Override
+    public void changeAnnouncementStatus(Long id, String status) {
+        Announcement announcement = this.getAnnouncementById(id);
+        if (Objects.equals(status, "ACTIVE")){
+            announcement.setStatus(Status.ACTIVE);
+        } else if (Objects.equals(status, "INROAD")){
+            announcement.setStatus(Status.INROAD);
+        } else if (Objects.equals(status, "COMPLETED")){
+            announcement.setStatus(Status.COMPLETED);
+        }else {
+
+            throw new StatusNotFoundException();
+
+        }
+
+        announcementRepository.save(announcement);
+
+    }
+
+    @Override
+    public Announcement getAnnouncementById(Long id) {
+
+        return  announcementRepository.findById(id).orElseThrow(
+                AnnouncementNotFoundException::new
+        );
+
+
     }
 
     private static List<TargetResponse> getTargetResponses(Announcement announcement) {

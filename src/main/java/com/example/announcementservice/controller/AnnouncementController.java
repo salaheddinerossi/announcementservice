@@ -2,7 +2,9 @@ package com.example.announcementservice.controller;
 
 
 import com.example.announcementservice.dto.AnnouncementDto;
+import com.example.announcementservice.dto.AnnouncementStatus;
 import com.example.announcementservice.exception.NoAuthorizationException;
+import com.example.announcementservice.model.Announcement;
 import com.example.announcementservice.model.Organization;
 import com.example.announcementservice.service.AnnouncementService;
 import com.example.announcementservice.service.OrganizationService;
@@ -11,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/announcements")
@@ -85,6 +89,26 @@ public class AnnouncementController {
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you are not allowed to access this page");
+    }
+
+    @PatchMapping("/")
+    public ResponseEntity<?> changeStatus(@RequestBody AnnouncementStatus announcementStatus,@RequestHeader("Authorization") String token){
+
+        Boolean isOrganization = userService.isOrganization(token,authService);
+
+        String email = userService.getEmail(token,authService);
+
+        Announcement announcement = announcementService.getAnnouncementById(announcementStatus.getId());
+
+
+        if (isOrganization){
+            if(Objects.equals(announcement.getOrganization().getEmail(), email)){
+                announcementService.changeAnnouncementStatus(announcementStatus.getId(),announcementStatus.getStatus());
+                return ResponseEntity.status(HttpStatus.OK).body("status has been changed ");
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you are not the owner of this announcement ");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you are not allowed to perform this action please log in ");
     }
 
 

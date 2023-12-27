@@ -58,5 +58,11 @@ public class GlobalExceptionHandler {
         return e.getMessage();
     }
 
+    @ExceptionHandler(StatusNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handelStatusNotFoundException(StatusNotFoundException e){
+        return e.getMessage();
+    }
+
 
 }
