@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import org.locationtech.jts.geom.Point;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -19,12 +20,18 @@ public class AnnouncementResponse {
 
     private String image;
 
+    private String status;
+
     @JsonSerialize(using = PointSerializer.class)
     private Point departPoint;
 
     @JsonSerialize(using = PointSerializer.class)
     private Point arrivePoint;
 
-    private List<TargetResponse> targetResponses;
+    private AuthorizationResponse authorizationResponse;
+
+    private List<TargetResponse> targetResponses = new ArrayList<>();
+
+    private OrganizationResponse organizationResponse;
 
 }

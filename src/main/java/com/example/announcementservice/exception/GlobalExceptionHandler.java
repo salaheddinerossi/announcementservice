@@ -46,6 +46,12 @@ public class GlobalExceptionHandler {
         return e.getMessage();
     }
 
+    @ExceptionHandler(AnnouncementNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handelAnnouncementNotFound(AnnouncementNotFoundException e){
+        return e.getMessage();
+    }
+
 
 
 }

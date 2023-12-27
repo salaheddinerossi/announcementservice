@@ -3,10 +3,14 @@ package com.example.announcementservice.serviceImpl;
 import com.example.announcementservice.dto.AnnouncementDto;
 import com.example.announcementservice.dto.TargetDto;
 import com.example.announcementservice.enums.Status;
+import com.example.announcementservice.exception.AnnouncementNotFoundException;
 import com.example.announcementservice.exception.DestinationPointException;
 import com.example.announcementservice.model.*;
 import com.example.announcementservice.repository.AnnouncementRepository;
 import com.example.announcementservice.response.AnnouncementResponse;
+import com.example.announcementservice.response.AuthorizationResponse;
+import com.example.announcementservice.response.OrganizationResponse;
+import com.example.announcementservice.response.TargetResponse;
 import com.example.announcementservice.service.AnnouncementService;
 import com.example.announcementservice.service.AuthorizationService;
 import com.example.announcementservice.service.GeometryService;
@@ -77,7 +81,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             Target target = new Target();
             target.setTargetValue(targetDto.getTargetValue());
             target.setName(targetDto.getName());
-            target.setCurrentValue(target.getCurrentValue());
+            target.setCurrentValue(0L);
             target.setAnnouncement(announcement);
             targets.add(target);
         }
@@ -95,6 +99,49 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     @Override
     public AnnouncementResponse getAnnouncement(Long id) {
-        return null;
+
+        Announcement announcement = announcementRepository.findById(id).orElseThrow(
+                AnnouncementNotFoundException::new
+        );
+
+        AnnouncementResponse announcementResponse = new AnnouncementResponse();
+
+        announcementResponse.setId(announcement.getId());
+        announcementResponse.setImage(announcement.getImage());
+        announcementResponse.setStatus(String.valueOf(announcement.getStatus()));
+        announcementResponse.setTitle(announcement.getTitle());
+        announcementResponse.setDescription(announcement.getDescription());
+        announcementResponse.setArrivePoint(announcement.getArrivePoint());
+        announcementResponse.setDepartPoint(announcement.getDepartPoint());
+
+        AuthorizationResponse authorizationResponse = new AuthorizationResponse();
+
+        authorizationResponse.setName(announcement.getAuthorization().getName());
+        authorizationResponse.setId(announcement.getAuthorization().getId());
+
+        announcementResponse.setAuthorizationResponse(authorizationResponse);
+
+        OrganizationResponse organizationResponse = new OrganizationResponse();
+
+        organizationResponse.setId(announcement.getOrganization().getId());
+        organizationResponse.setName(announcement.getOrganization().getName());
+
+        announcementResponse.setOrganizationResponse(organizationResponse);
+
+        for (Target target : announcement.getTargets()){
+
+            TargetResponse targetResponse = new TargetResponse();
+
+            targetResponse.setName(target.getName());
+            targetResponse.setId(target.getId());
+            targetResponse.setId(target.getId());
+            targetResponse.setTargetValue(target.getTargetValue());
+            targetResponse.setTargetValue(target.getTargetValue());
+
+            announcementResponse.getTargetResponses().add(targetResponse);
+
+        }
+
+        return announcementResponse;
     }
 }

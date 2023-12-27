@@ -58,4 +58,11 @@ public class AnnouncementController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you are not logged in");
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAnnouncementById(@PathVariable Long id ){
+        return ResponseEntity.status(HttpStatus.OK).body(
+                announcementService.getAnnouncement(id)
+        );
+    }
+
 }
