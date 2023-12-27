@@ -65,4 +65,11 @@ public class AnnouncementController {
         );
     }
 
+    @GetMapping("/disaster/{id}")
+    public ResponseEntity<?> getAnnouncementsByDisaster(@PathVariable Long id){
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                announcementService.getAnnouncementsByDisaster(id)
+        );
+    }
 }

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class AnnouncementResponse {
+public class AnnouncementResponseDisaster {
 
     private Long id;
 
@@ -20,20 +20,10 @@ public class AnnouncementResponse {
 
     private String image;
 
-    private String status;
-
-    @JsonSerialize(using = PointSerializer.class)
-    private Point departPoint;
-
-    @JsonSerialize(using = PointSerializer.class)
-    private Point arrivePoint;
-
     private AuthorizationResponse authorizationResponse;
 
+    private String disasterName;
+
     private List<TargetResponse> targetResponses = new ArrayList<>();
-
-    private OrganizationResponse organizationResponse;
-
-
 
 }

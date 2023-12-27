@@ -5,18 +5,15 @@ import com.example.announcementservice.dto.TargetDto;
 import com.example.announcementservice.enums.Status;
 import com.example.announcementservice.exception.AnnouncementNotFoundException;
 import com.example.announcementservice.exception.DestinationPointException;
+import com.example.announcementservice.exception.DisasterNotFoundException;
 import com.example.announcementservice.model.*;
 import com.example.announcementservice.repository.AnnouncementRepository;
-import com.example.announcementservice.response.AnnouncementResponse;
-import com.example.announcementservice.response.AuthorizationResponse;
-import com.example.announcementservice.response.OrganizationResponse;
-import com.example.announcementservice.response.TargetResponse;
+import com.example.announcementservice.response.*;
 import com.example.announcementservice.service.AnnouncementService;
 import com.example.announcementservice.service.AuthorizationService;
 import com.example.announcementservice.service.GeometryService;
 import com.example.announcementservice.service.ZoneService;
 import jakarta.transaction.Transactional;
-import org.geolatte.geom.codec.support.DecodeException;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 
@@ -143,5 +140,64 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         }
 
         return announcementResponse;
+    }
+
+    @Override
+    public List<AnnouncementResponseDisaster> getAnnouncementsByDisaster(Long id) {
+
+        List<Announcement> announcements = announcementRepository.findByZoneDisasterId(id).orElseThrow(
+                DisasterNotFoundException::new
+        );
+
+
+        
+        List<AnnouncementResponseDisaster> announcementResponseDisasters = new ArrayList<>();
+        for (Announcement announcement : announcements){
+            
+            AnnouncementResponseDisaster announcementResponseDisaster = new AnnouncementResponseDisaster();
+
+            List<TargetResponse> targetResponses = getTargetResponses(announcement);
+
+            announcementResponseDisaster.setTargetResponses(targetResponses);
+            announcementResponseDisaster.setTitle(announcement.getTitle());
+            announcementResponseDisaster.setImage(announcement.getImage());
+            announcementResponseDisaster.setId(announcement.getId());
+            announcementResponseDisaster.setDescription(announcement.getDescription());
+
+            Authorization authorization = announcement.getAuthorization();
+
+            AuthorizationResponse authorizationResponse = new AuthorizationResponse();
+
+            authorizationResponse.setId(authorization.getId());
+            authorizationResponse.setName(authorization.getName());
+
+            announcementResponseDisaster.setAuthorizationResponse(authorizationResponse);
+
+            announcementResponseDisaster.setDisasterName(
+                    announcement.getZone().getDisaster().getName()
+            );
+
+            announcementResponseDisasters.add(announcementResponseDisaster);
+        }
+
+        return announcementResponseDisasters;
+
+    }
+
+    private static List<TargetResponse> getTargetResponses(Announcement announcement) {
+        List<TargetResponse> targetResponses = new ArrayList<>();
+
+        for (Target target : announcement.getTargets()){
+
+            TargetResponse targetResponse = new TargetResponse();
+
+            targetResponse.setName(target.getName());
+            targetResponse.setCurrentValue(target.getCurrentValue());
+            targetResponse.setTargetValue(target.getTargetValue());
+            targetResponse.setId(target.getId());
+
+            targetResponses.add(targetResponse);
+        }
+        return targetResponses;
     }
 }
