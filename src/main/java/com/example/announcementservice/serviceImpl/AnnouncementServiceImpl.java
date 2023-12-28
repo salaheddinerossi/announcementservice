@@ -126,70 +126,32 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
         announcementResponse.setOrganizationResponse(organizationResponse);
 
-        for (Target target : announcement.getTargets()){
+        List<TargetResponse> targetResponses = getTargetResponses(announcement);
 
-            TargetResponse targetResponse = new TargetResponse();
-
-            targetResponse.setName(target.getName());
-            targetResponse.setId(target.getId());
-            targetResponse.setId(target.getId());
-            targetResponse.setTargetValue(target.getTargetValue());
-            targetResponse.setTargetValue(target.getTargetValue());
-
-            announcementResponse.getTargetResponses().add(targetResponse);
-
-        }
+        announcementResponse.setTargetResponses(targetResponses);
 
         return announcementResponse;
     }
 
     @Override
     public List<AnnouncementResponseDisaster> getAnnouncementsByDisaster(Long id) {
-
         List<Announcement> announcements = announcementRepository.findByZoneDisasterId(id).orElseThrow(
                 DisasterNotFoundException::new
         );
 
-
-        
         List<AnnouncementResponseDisaster> announcementResponseDisasters = new ArrayList<>();
         for (Announcement announcement : announcements){
             if(announcement.getStatus()==Status.ACTIVE) {
 
-                AnnouncementResponseDisaster announcementResponseDisaster = new AnnouncementResponseDisaster();
-
-                List<TargetResponse> targetResponses = getTargetResponses(announcement);
-
-                announcementResponseDisaster.setTargetResponses(targetResponses);
-                announcementResponseDisaster.setTitle(announcement.getTitle());
-                announcementResponseDisaster.setImage(announcement.getImage());
-                announcementResponseDisaster.setId(announcement.getId());
-                announcementResponseDisaster.setDescription(announcement.getDescription());
-
-                Authorization authorization = announcement.getAuthorization();
-
-                AuthorizationResponse authorizationResponse = new AuthorizationResponse();
-
-                authorizationResponse.setId(authorization.getId());
-                authorizationResponse.setName(authorization.getName());
-
-                announcementResponseDisaster.setAuthorizationResponse(authorizationResponse);
-
-                announcementResponseDisaster.setDisasterName(
-                        announcement.getZone().getDisaster().getName()
-                );
-
+                AnnouncementResponseDisaster announcementResponseDisaster = announcementToAnnouncementResponseDisaster(announcement);
                 announcementResponseDisasters.add(announcementResponseDisaster);
             }
         }
-
         return announcementResponseDisasters;
-
     }
 
     @Override
     public DisasterResponse getDisasterWithAnnouncement(Long id) {
-
         Disaster disaster = disasterService.getDisasterById(id);
 
         DisasterResponse disasterResponse= new DisasterResponse();
@@ -224,12 +186,26 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     @Override
     public Announcement getAnnouncementById(Long id) {
-
         return  announcementRepository.findById(id).orElseThrow(
+                AnnouncementNotFoundException::new
+        );
+    }
+
+    @Override
+    public List<AnnouncementResponseDisaster> getAnnouncementsByOrganizationId(Long id) {
+        List<Announcement> announcements =  announcementRepository.findByOrganizationId(id).orElseThrow(
                 AnnouncementNotFoundException::new
         );
 
 
+        List<AnnouncementResponseDisaster> announcementResponseDisasters = new ArrayList<>();
+
+        for (Announcement announcement : announcements){
+            AnnouncementResponseDisaster announcementResponseDisaster = announcementToAnnouncementResponseDisaster(announcement);
+            announcementResponseDisasters.add(announcementResponseDisaster);
+        }
+
+        return announcementResponseDisasters;
     }
 
     private static List<TargetResponse> getTargetResponses(Announcement announcement) {
@@ -297,5 +273,31 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             announcementOrganizationResponses.add(announcementOrganizationResponse);
         }
         return announcementOrganizationResponses;
+    }
+
+    public static AnnouncementResponseDisaster announcementToAnnouncementResponseDisaster(Announcement announcement){
+        AnnouncementResponseDisaster announcementResponseDisaster = new AnnouncementResponseDisaster();
+
+        List<TargetResponse> targetResponses = getTargetResponses(announcement);
+
+        announcementResponseDisaster.setTargetResponses(targetResponses);
+        announcementResponseDisaster.setTitle(announcement.getTitle());
+        announcementResponseDisaster.setImage(announcement.getImage());
+        announcementResponseDisaster.setId(announcement.getId());
+        announcementResponseDisaster.setDescription(announcement.getDescription());
+
+        Authorization authorization = announcement.getAuthorization();
+
+        AuthorizationResponse authorizationResponse = new AuthorizationResponse();
+
+        authorizationResponse.setId(authorization.getId());
+        authorizationResponse.setName(authorization.getName());
+
+        announcementResponseDisaster.setAuthorizationResponse(authorizationResponse);
+
+        announcementResponseDisaster.setDisasterName(
+                announcement.getZone().getDisaster().getName()
+        );
+        return announcementResponseDisaster;
     }
 }

@@ -30,7 +30,7 @@ public class AnnouncementResponse {
 
     private AuthorizationResponse authorizationResponse;
 
-    private List<TargetResponse> targetResponses = new ArrayList<>();
+    private List<TargetResponse> targetResponses;
 
     private OrganizationResponse organizationResponse;
 

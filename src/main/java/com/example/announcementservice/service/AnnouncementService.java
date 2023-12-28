@@ -11,16 +11,19 @@ import java.util.List;
 
 public interface AnnouncementService {
 
-    public AnnouncementDto createAnnouncement(AnnouncementDto announcementDto, Organization organization);
+    AnnouncementDto createAnnouncement(AnnouncementDto announcementDto, Organization organization);
 
-    public AnnouncementResponse getAnnouncement(Long id);
+    AnnouncementResponse getAnnouncement(Long id);
 
-    public List<AnnouncementResponseDisaster> getAnnouncementsByDisaster(Long id);
+    List<AnnouncementResponseDisaster> getAnnouncementsByDisaster(Long id);
 
-    public DisasterResponse getDisasterWithAnnouncement(Long id);
+    DisasterResponse getDisasterWithAnnouncement(Long id);
 
-    public void changeAnnouncementStatus(Long id,String status);
+    void changeAnnouncementStatus(Long id,String status);
 
-    public Announcement getAnnouncementById(Long id);
+    Announcement getAnnouncementById(Long id);
+
+    List<AnnouncementResponseDisaster> getAnnouncementsByOrganizationId(Long id);
+
 
 }

@@ -6,6 +6,7 @@ import com.example.announcementservice.dto.AnnouncementStatus;
 import com.example.announcementservice.exception.NoAuthorizationException;
 import com.example.announcementservice.model.Announcement;
 import com.example.announcementservice.model.Organization;
+import com.example.announcementservice.response.AnnouncementResponseDisaster;
 import com.example.announcementservice.service.AnnouncementService;
 import com.example.announcementservice.service.OrganizationService;
 import com.example.announcementservice.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -93,13 +95,11 @@ public class AnnouncementController {
 
     @PatchMapping("/")
     public ResponseEntity<?> changeStatus(@RequestBody AnnouncementStatus announcementStatus,@RequestHeader("Authorization") String token){
-
         Boolean isOrganization = userService.isOrganization(token,authService);
 
         String email = userService.getEmail(token,authService);
 
         Announcement announcement = announcementService.getAnnouncementById(announcementStatus.getId());
-
 
         if (isOrganization){
             if(Objects.equals(announcement.getOrganization().getEmail(), email)){
@@ -111,5 +111,21 @@ public class AnnouncementController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you are not allowed to perform this action please log in ");
     }
 
+    @GetMapping("/organization")
+    public ResponseEntity<?> getAnnouncementsByOrganization(@RequestHeader("Authorization") String token){
+        Boolean isOrganization = userService.isOrganization(token,authService);
+
+        if (isOrganization){
+
+            String OrganizationEmail = userService.getEmail(token,authService);
+            Organization organization = organizationService.getOrganizationByEmail(OrganizationEmail);
+
+            List<AnnouncementResponseDisaster> announcementResponseDisasters = announcementService.getAnnouncementsByOrganizationId(organization.getId());
+
+            return ResponseEntity.status(HttpStatus.OK).body(announcementResponseDisasters);
+
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you cannot access this data");
+    }
 
 }

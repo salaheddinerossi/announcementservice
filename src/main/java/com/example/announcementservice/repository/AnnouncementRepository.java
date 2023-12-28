@@ -10,5 +10,7 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
 
     public Optional<List<Announcement>> findByZoneDisasterId(Long id);
 
+    public Optional<List<Announcement>> findByOrganizationId(Long id);
+
 
 }
