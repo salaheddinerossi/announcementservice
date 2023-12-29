@@ -10,6 +10,7 @@ import com.example.announcementservice.response.AnnouncementResponseDisaster;
 import com.example.announcementservice.service.AnnouncementService;
 import com.example.announcementservice.service.OrganizationService;
 import com.example.announcementservice.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class AnnouncementController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> createAnnouncement(@RequestBody  AnnouncementDto announcementDto, @RequestHeader("Authorization") String token){
+    public ResponseEntity<?> createAnnouncement(@Valid @RequestBody  AnnouncementDto announcementDto, @RequestHeader("Authorization") String token){
         Boolean isOrganization = userService.isOrganization(token,authService);
 
         if(isOrganization){
@@ -94,7 +95,7 @@ public class AnnouncementController {
     }
 
     @PatchMapping("/")
-    public ResponseEntity<?> changeStatus(@RequestBody AnnouncementStatus announcementStatus,@RequestHeader("Authorization") String token){
+    public ResponseEntity<?> changeStatus(@Valid @RequestBody AnnouncementStatus announcementStatus,@RequestHeader("Authorization") String token){
         Boolean isOrganization = userService.isOrganization(token,authService);
 
         String email = userService.getEmail(token,authService);
