@@ -24,7 +24,7 @@ import java.util.Objects;
 public class AnnouncementController {
 
     @Value("${other.service.url}")
-    private String authService;
+    private String authServiceUrl;
 
     final
     AnnouncementService announcementService;
@@ -43,16 +43,15 @@ public class AnnouncementController {
 
     @PostMapping("/")
     public ResponseEntity<?> createAnnouncement(@Valid @RequestBody  AnnouncementDto announcementDto, @RequestHeader("Authorization") String token){
-        Boolean isOrganization = userService.isOrganization(token,authService);
+        Boolean isOrganization = userService.isOrganization(token,authServiceUrl);
 
         if(isOrganization){
 
-            String OrganizationEmail = userService.getEmail(token,authService);
+            String OrganizationEmail = userService.getEmail(token,authServiceUrl);
             Organization organization = organizationService.getOrganizationByEmail(OrganizationEmail);
 
             Boolean hasAuthorisation = organizationService.hasAuthorization(organization,announcementDto.getAuthorization_id());
 
-            System.out.println(announcementDto);
             if (hasAuthorisation){
 
                 return ResponseEntity.status(HttpStatus.OK).body(announcementService.createAnnouncement(announcementDto,organization)) ;
@@ -82,7 +81,7 @@ public class AnnouncementController {
 
     @GetMapping("/disaster/all/{id}")
     public ResponseEntity<?> getDisasterWithAnnouncements(@PathVariable Long id,@RequestHeader("Authorization") String token){
-        Boolean isOrganization = userService.isOrganization(token,authService);
+        Boolean isOrganization = userService.isOrganization(token,authServiceUrl);
 
         if(isOrganization){
             return ResponseEntity.status(HttpStatus.OK).body(
@@ -96,9 +95,9 @@ public class AnnouncementController {
 
     @PatchMapping("/")
     public ResponseEntity<?> changeStatus(@Valid @RequestBody AnnouncementStatus announcementStatus,@RequestHeader("Authorization") String token){
-        Boolean isOrganization = userService.isOrganization(token,authService);
+        Boolean isOrganization = userService.isOrganization(token,authServiceUrl);
 
-        String email = userService.getEmail(token,authService);
+        String email = userService.getEmail(token,authServiceUrl);
 
         Announcement announcement = announcementService.getAnnouncementById(announcementStatus.getId());
 
@@ -114,11 +113,11 @@ public class AnnouncementController {
 
     @GetMapping("/organization")
     public ResponseEntity<?> getAnnouncementsByOrganization(@RequestHeader("Authorization") String token){
-        Boolean isOrganization = userService.isOrganization(token,authService);
+        Boolean isOrganization = userService.isOrganization(token,authServiceUrl);
 
         if (isOrganization){
 
-            String OrganizationEmail = userService.getEmail(token,authService);
+            String OrganizationEmail = userService.getEmail(token,authServiceUrl);
             Organization organization = organizationService.getOrganizationByEmail(OrganizationEmail);
 
             List<AnnouncementResponseDisaster> announcementResponseDisasters = announcementService.getAnnouncementsByOrganizationId(organization.getId());

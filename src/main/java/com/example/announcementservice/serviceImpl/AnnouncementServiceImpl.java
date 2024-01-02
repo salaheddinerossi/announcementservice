@@ -123,6 +123,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
         organizationResponse.setId(announcement.getOrganization().getId());
         organizationResponse.setName(announcement.getOrganization().getName());
+        organizationResponse.setEmail(announcement.getOrganization().getEmail());
 
         announcementResponse.setOrganizationResponse(organizationResponse);
 

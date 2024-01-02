@@ -9,4 +9,6 @@ public class OrganizationResponse {
 
     private String name;
 
+    private String email;
+
 }
