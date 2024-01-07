@@ -35,7 +35,6 @@ public class AnnouncementDto {
     @NotNull(message = "Authorization ID is required")
     private Long authorization_id;
 
-    @NotNull(message = "Organization ID is required")
     private Long organization_id;
 
     @NotNull(message = "Targets are required")
