@@ -93,7 +93,7 @@ public class AnnouncementController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you are not allowed to access this page");
     }
 
-    @PostMapping("/")
+    @PostMapping("/changeStatus")
     public ResponseEntity<?> changeStatus(@Valid @RequestBody AnnouncementStatus announcementStatus,@RequestHeader("Authorization") String token){
         Boolean isOrganization = userService.isOrganization(token,authServiceUrl);
 
